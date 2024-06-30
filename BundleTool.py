@@ -98,13 +98,13 @@ def BundlePCUnpacker(Path, Bundle):
     IDsSize = struct.unpack("<L", bytes.fromhex(Bundle[40:48]))[0]
 
     ResourceEntriesOffset = struct.unpack("<L", bytes.fromhex(Bundle[32:40]))[0]
-    ResourceCompress1Offset = struct.unpack("<L", bytes.fromhex(Bundle[40:48]))[0]
-    ResourceCompress2Offset = struct.unpack("<L", bytes.fromhex(Bundle[48:56]))[0]
-    ResourceCompress3Offset = struct.unpack("<L", bytes.fromhex(Bundle[56:64]))[0]
-    ResourceCompress4Offset = struct.unpack("<L", bytes.fromhex(Bundle[64:72]))[0]
+    ResourceCompressed1Offset = struct.unpack("<L", bytes.fromhex(Bundle[40:48]))[0]
+    ResourceCompressed2Offset = struct.unpack("<L", bytes.fromhex(Bundle[48:56]))[0]
+    ResourceCompressed3Offset = struct.unpack("<L", bytes.fromhex(Bundle[56:64]))[0]
+    ResourceCompressed4Offset = struct.unpack("<L", bytes.fromhex(Bundle[64:72]))[0]
 
-    ResourceCompress1 = Bundle[ResourceCompress1Offset * 2:ResourceCompress2Offset * 2]
-    ResourceCompress2 = Bundle[ResourceCompress2Offset * 2:ResourceCompress3Offset * 2]
+    ResourceCompressed1 = Bundle[ResourceCompressed1Offset * 2:ResourceCompressed2Offset * 2]
+    ResourceCompressed2 = Bundle[ResourceCompressed2Offset * 2:ResourceCompressed3Offset * 2]
 
     ResourceEntireCount = struct.unpack("<L", bytes.fromhex(Bundle[24:32]))[0]
     for ResourceEntireNum in range(ResourceEntireCount):
@@ -130,36 +130,36 @@ def BundlePCUnpacker(Path, Bundle):
         if not os.path.exists(OutputDirPath):
             os.makedirs(OutputDirPath)
 
-        ResourceCompress1BlockOffset = struct.unpack("<L", bytes.fromhex(ResourceEntire[80:88]))[0]
-        ResourceCompress1BlockSize = struct.unpack("<L", bytes.fromhex(ResourceEntire[48:56]))[0]
+        ResourceCompressed1BlockOffset = struct.unpack("<L", bytes.fromhex(ResourceEntire[80:88]))[0]
+        ResourceCompressed1BlockSize = struct.unpack("<L", bytes.fromhex(ResourceEntire[48:56]))[0]
 
-        ResourceCompress1Block = ResourceCompress1[ResourceCompress1BlockOffset * 2:(ResourceCompress1BlockOffset + ResourceCompress1BlockSize) * 2]
-        ResourceUnCompress1Block = zlib.decompressobj().decompress(bytes.fromhex(ResourceCompress1Block)).hex()  # 解压压缩资源数据1
+        ResourceCompressed1Block = ResourceCompressed1[ResourceCompressed1BlockOffset * 2:(ResourceCompressed1BlockOffset + ResourceCompressed1BlockSize) * 2]
+        ResourceUnCompressed1Block = zlib.decompressobj().decompress(bytes.fromhex(ResourceCompressed1Block)).hex()  # 解压压缩资源数据1
 
         Unpack = open(OutputDirPath + "\\" + ResourceID + ".dat", "wb")
-        Unpack.write(bytes.fromhex(ResourceUnCompress1Block))
+        Unpack.write(bytes.fromhex(ResourceUnCompressed1Block))
         Unpack.close()
 
         if ResourceType == "Texture":
-            ResourceCompress2BlockOffset = struct.unpack("<L", bytes.fromhex(ResourceEntire[88:96]))[0]
-            ResourceCompress2BlockSize = struct.unpack("<L", bytes.fromhex(ResourceEntire[56:64]))[0]
+            ResourceCompressed2BlockOffset = struct.unpack("<L", bytes.fromhex(ResourceEntire[88:96]))[0]
+            ResourceCompressed2BlockSize = struct.unpack("<L", bytes.fromhex(ResourceEntire[56:64]))[0]
 
-            ResourceCompress2Block = ResourceCompress2[ResourceCompress2BlockOffset * 2:(ResourceCompress2BlockOffset + ResourceCompress2BlockSize) * 2]
-            ResourceUnCompress2Block = zlib.decompressobj().decompress(bytes.fromhex(ResourceCompress2Block)).hex()  # 解压压缩资源数据1
+            ResourceCompressed2Block = ResourceCompressed2[ResourceCompressed2BlockOffset * 2:(ResourceCompressed2BlockOffset + ResourceCompressed2BlockSize) * 2]
+            ResourceUnCompressed2Block = zlib.decompressobj().decompress(bytes.fromhex(ResourceCompressed2Block)).hex()  # 解压压缩资源数据1
 
             Unpack = open(OutputDirPath + "\\" + ResourceID + "_texture.dat", "wb")
-            Unpack.write(bytes.fromhex(ResourceUnCompress2Block))
+            Unpack.write(bytes.fromhex(ResourceUnCompressed2Block))
             Unpack.close()
 
         elif ResourceType == "Renderable":
-            ResourceCompress2BlockOffset = struct.unpack("<L", bytes.fromhex(ResourceEntire[88:96]))[0]
-            ResourceCompress2BlockSize = struct.unpack("<L", bytes.fromhex(ResourceEntire[56:64]))[0]
+            ResourceCompressed2BlockOffset = struct.unpack("<L", bytes.fromhex(ResourceEntire[88:96]))[0]
+            ResourceCompressed2BlockSize = struct.unpack("<L", bytes.fromhex(ResourceEntire[56:64]))[0]
 
-            ResourceCompress2Block = ResourceCompress2[ResourceCompress2BlockOffset * 2:(ResourceCompress2BlockOffset + ResourceCompress2BlockSize) * 2]
-            ResourceUnCompress2Block = zlib.decompressobj().decompress(bytes.fromhex(ResourceCompress2Block)).hex()  # 解压压缩资源数据1
+            ResourceCompressed2Block = ResourceCompressed2[ResourceCompressed2BlockOffset * 2:(ResourceCompressed2BlockOffset + ResourceCompressed2BlockSize) * 2]
+            ResourceUnCompressed2Block = zlib.decompressobj().decompress(bytes.fromhex(ResourceCompressed2Block)).hex()  # 解压压缩资源数据1
 
             Unpack = open(OutputDirPath + "\\" + ResourceID + "_model.dat", "wb")
-            Unpack.write(bytes.fromhex(ResourceUnCompress2Block))
+            Unpack.write(bytes.fromhex(ResourceUnCompressed2Block))
             Unpack.close()
 
     IDs = open(os.path.dirname(OutputDirPath) + "\\" + "IDs.BIN", "wb")
@@ -174,19 +174,19 @@ def BundlePCUnpacker(Path, Bundle):
 
 
 def BundlePS3Unpacker(Path, Bundle):
-    BundleSize =  struct.unpack(">L", bytes.fromhex(Bundle[16:24]))[0]
+    BundleSize = struct.unpack(">L", bytes.fromhex(Bundle[16:24]))[0]
     IDsSize = struct.unpack(">L", bytes.fromhex(Bundle[40:48]))[0]
 
     ResourceEntriesOffset = struct.unpack(">L", bytes.fromhex(Bundle[32:40]))[0]
-    ResourceCompress1Offset = struct.unpack(">L", bytes.fromhex(Bundle[40:48]))[0]
-    ResourceCompress2Offset = struct.unpack(">L", bytes.fromhex(Bundle[48:56]))[0]
-    ResourceCompress3Offset = struct.unpack(">L", bytes.fromhex(Bundle[56:64]))[0]
-    ResourceCompress4Offset = struct.unpack(">L", bytes.fromhex(Bundle[64:72]))[0]
+    ResourceCompressed1Offset = struct.unpack(">L", bytes.fromhex(Bundle[40:48]))[0]
+    ResourceCompressed2Offset = struct.unpack(">L", bytes.fromhex(Bundle[48:56]))[0]
+    ResourceCompressed3Offset = struct.unpack(">L", bytes.fromhex(Bundle[56:64]))[0]
+    ResourceCompressed4Offset = struct.unpack(">L", bytes.fromhex(Bundle[64:72]))[0]
 
-    ResourceCompress1 = Bundle[ResourceCompress1Offset * 2:ResourceCompress2Offset * 2]
-    ResourceCompress2 = Bundle[ResourceCompress2Offset * 2:ResourceCompress3Offset * 2]
-    ResourceCompress3 = Bundle[ResourceCompress3Offset * 2:ResourceCompress4Offset * 2]
-    ResourceCompress4 = Bundle[ResourceCompress4Offset * 2:BundleSize * 2]
+    ResourceCompressed1 = Bundle[ResourceCompressed1Offset * 2:ResourceCompressed2Offset * 2]
+    ResourceCompressed2 = Bundle[ResourceCompressed2Offset * 2:ResourceCompressed3Offset * 2]
+    ResourceCompressed3 = Bundle[ResourceCompressed3Offset * 2:ResourceCompressed4Offset * 2]
+    ResourceCompressed4 = Bundle[ResourceCompressed4Offset * 2:BundleSize * 2]
 
     ResourceEntireCount = struct.unpack(">L", bytes.fromhex(Bundle[24:32]))[0]
     for ResourceEntireNum in range(ResourceEntireCount):
@@ -213,58 +213,63 @@ def BundlePS3Unpacker(Path, Bundle):
         if not os.path.exists(OutputDirPath):
             os.makedirs(OutputDirPath)
 
-        ResourceCompress1BlockOffset = struct.unpack(">L", bytes.fromhex(ResourceEntire[80:88]))[0]
-        ResourceCompress1BlockSize = struct.unpack(">L", bytes.fromhex(ResourceEntire[48:56]))[0]
+        ResourceUnCompressed1BlockSize = struct.unpack(">L", bytes.fromhex(ResourceEntire[16:24]))[0]
 
-        ResourceCompress1Block = ResourceCompress1[ResourceCompress1BlockOffset * 2:(ResourceCompress1BlockOffset + ResourceCompress1BlockSize) * 2]
-        ResourceUnCompress1Block = zlib.decompressobj().decompress(bytes.fromhex(ResourceCompress1Block)).hex()  # 解压压缩资源数据1
+        ResourceCompressed1BlockOffset = struct.unpack(">L", bytes.fromhex(ResourceEntire[80:88]))[0]
+        ResourceCompressed1BlockSize = struct.unpack(">L", bytes.fromhex(ResourceEntire[48:56]))[0]
+
+        ResourceCompressed1Block = ResourceCompressed1[ResourceCompressed1BlockOffset * 2:(ResourceCompressed1BlockOffset + ResourceCompressed1BlockSize) * 2]
+        if ResourceUnCompressed1BlockSize == ResourceCompressed1BlockSize:
+            ResourceUnCompressed1Block = ResourceCompressed1[ResourceCompressed1BlockOffset * 2:(ResourceCompressed1BlockOffset + ResourceCompressed1BlockSize) * 2]
+        else:
+            ResourceUnCompressed1Block = zlib.decompressobj().decompress(bytes.fromhex(ResourceCompressed1Block)).hex()  # 解压压缩资源数据1
 
         UnpackedResource = open(OutputDirPath + "\\" + ResourceID + ".dat", "wb")
-        UnpackedResource.write(bytes.fromhex(ResourceUnCompress1Block))
+        UnpackedResource.write(bytes.fromhex(ResourceUnCompressed1Block))
         UnpackedResource.close()
 
         if ResourceType == "ShaderProgramBuffer":
-            ResourceCompress2BlockOffset = struct.unpack(">L", bytes.fromhex(ResourceEntire[88:96]))[0]
-            ResourceCompress2BlockSize = struct.unpack(">L", bytes.fromhex(ResourceEntire[56:64]))[0]
+            ResourceCompressed2BlockOffset = struct.unpack(">L", bytes.fromhex(ResourceEntire[88:96]))[0]
+            ResourceCompressed2BlockSize = struct.unpack(">L", bytes.fromhex(ResourceEntire[56:64]))[0]
 
-            ResourceCompress2Block = ResourceCompress2[ResourceCompress2BlockOffset * 2:(ResourceCompress2BlockOffset + ResourceCompress2BlockSize) * 2]
-            ResourceUnCompress2Block = zlib.decompressobj().decompress(bytes.fromhex(ResourceCompress2Block)).hex()  # 解压压缩资源数据1
+            ResourceCompressed2Block = ResourceCompressed2[ResourceCompressed2BlockOffset * 2:(ResourceCompressed2BlockOffset + ResourceCompressed2BlockSize) * 2]
+            ResourceUnCompressed2Block = zlib.decompressobj().decompress(bytes.fromhex(ResourceCompressed2Block)).hex()  # 解压压缩资源数据1
 
             UnpackedResource = open(OutputDirPath + "\\" + ResourceID + "_unknow.dat", "wb")
-            UnpackedResource.write(bytes.fromhex(ResourceUnCompress2Block))
+            UnpackedResource.write(bytes.fromhex(ResourceUnCompressed2Block))
             UnpackedResource.close()
 
         elif ResourceType == "Texture":
-            ResourceCompress3BlockOffset = struct.unpack(">L", bytes.fromhex(ResourceEntire[96:104]))[0]
-            ResourceCompress3BlockSize = struct.unpack(">L", bytes.fromhex(ResourceEntire[64:72]))[0]
+            ResourceCompressed3BlockOffset = struct.unpack(">L", bytes.fromhex(ResourceEntire[96:104]))[0]
+            ResourceCompressed3BlockSize = struct.unpack(">L", bytes.fromhex(ResourceEntire[64:72]))[0]
 
-            ResourceCompress3Block = ResourceCompress3[ResourceCompress3BlockOffset * 2:(ResourceCompress3BlockOffset + ResourceCompress3BlockSize) * 2]
-            ResourceUnCompress3Block = zlib.decompressobj().decompress(bytes.fromhex(ResourceCompress3Block)).hex()  # 解压压缩资源数据1
+            ResourceCompressed3Block = ResourceCompressed3[ResourceCompressed3BlockOffset * 2:(ResourceCompressed3BlockOffset + ResourceCompressed3BlockSize) * 2]
+            ResourceUnCompressed3Block = zlib.decompressobj().decompress(bytes.fromhex(ResourceCompressed3Block)).hex()  # 解压压缩资源数据1
 
             UnpackedResource = open(OutputDirPath + "\\" + ResourceID + "_texture.dat", "wb")
-            UnpackedResource.write(bytes.fromhex(ResourceUnCompress3Block))
+            UnpackedResource.write(bytes.fromhex(ResourceUnCompressed3Block))
             UnpackedResource.close()
 
         elif ResourceType == "Renderable":
-            ResourceCompress3BlockOffset = struct.unpack(">L", bytes.fromhex(ResourceEntire[96:104]))[0]
-            ResourceCompress3BlockSize = struct.unpack(">L", bytes.fromhex(ResourceEntire[64:72]))[0]
+            ResourceCompressed3BlockOffset = struct.unpack(">L", bytes.fromhex(ResourceEntire[96:104]))[0]
+            ResourceCompressed3BlockSize = struct.unpack(">L", bytes.fromhex(ResourceEntire[64:72]))[0]
 
-            ResourceCompress3Block = ResourceCompress3[ResourceCompress3BlockOffset * 2:(ResourceCompress3BlockOffset + ResourceCompress3BlockSize) * 2]
-            ResourceUnCompress3Block = zlib.decompressobj().decompress(bytes.fromhex(ResourceCompress3Block)).hex()  # 解压压缩资源数据1
+            ResourceCompressed3Block = ResourceCompressed3[ResourceCompressed3BlockOffset * 2:(ResourceCompressed3BlockOffset + ResourceCompressed3BlockSize) * 2]
+            ResourceUnCompressed3Block = zlib.decompressobj().decompress(bytes.fromhex(ResourceCompressed3Block)).hex()  # 解压压缩资源数据1
 
             UnpackedResource = open(OutputDirPath + "\\" + ResourceID + "_vertices.dat", "wb")
-            UnpackedResource.write(bytes.fromhex(ResourceUnCompress3Block))
+            UnpackedResource.write(bytes.fromhex(ResourceUnCompressed3Block))
             UnpackedResource.close()
 
         elif ResourceType == "CgsProgramBuffer":
-            ResourceCompress4BlockOffset = struct.unpack(">L", bytes.fromhex(ResourceEntire[104:112]))[0]
-            ResourceCompress4BlockSize = struct.unpack(">L", bytes.fromhex(ResourceEntire[72:80]))[0]
+            ResourceCompressed4BlockOffset = struct.unpack(">L", bytes.fromhex(ResourceEntire[104:112]))[0]
+            ResourceCompressed4BlockSize = struct.unpack(">L", bytes.fromhex(ResourceEntire[72:80]))[0]
 
-            ResourceCompress4Block = ResourceCompress4[ResourceCompress4BlockOffset * 2:(ResourceCompress4BlockOffset + ResourceCompress4BlockSize) * 2]
-            ResourceUnCompress4Block = zlib.decompressobj().decompress(bytes.fromhex(ResourceCompress4Block)).hex()  # 解压压缩资源数据1
+            ResourceCompressed4Block = ResourceCompressed4[ResourceCompressed4BlockOffset * 2:(ResourceCompressed4BlockOffset + ResourceCompressed4BlockSize) * 2]
+            ResourceUnCompressed4Block = zlib.decompressobj().decompress(bytes.fromhex(ResourceCompressed4Block)).hex()  # 解压压缩资源数据1
 
             UnpackedResource = open(OutputDirPath + "\\" + ResourceID + "_unknow.dat", "wb")
-            UnpackedResource.write(bytes.fromhex(ResourceUnCompress4Block))
+            UnpackedResource.write(bytes.fromhex(ResourceUnCompressed4Block))
             UnpackedResource.close()
 
     IDs = open(os.path.dirname(OutputDirPath) + "\\" + "IDs.BIN", "wb")
@@ -813,8 +818,22 @@ def BundlePS3Packer(Path, IDs):
             ResourceUncompressed4Size = 0
             ResourceCompressed4Size = 0
 
-            ImportCount = struct.unpack(">H", bytes.fromhex(ResourceUncompressed1[8:10]))[0]
-            ImportsOffset = ResourceUncompressed1Size - ImportCount * 16
+            Unknow1 = struct.unpack(">H", bytes.fromhex(ResourceUncompressed1[8:12]))[0]
+            Unknow2 = struct.unpack("<H", bytes.fromhex(ResourceUncompressed1[12:16]))[0]
+            if Unknow1 == 0 or Unknow2 == 1:
+                ImportsOffset = 0
+                ImportCount = 0
+            else:
+                DataSize = struct.unpack(">H", bytes.fromhex(ResourceUncompressed1[40:44]))[0]
+                if DataSize % 16 == 0 and DataSize == ResourceUncompressed1Size:
+                    ImportsOffset = 0
+                    ImportCount = 0
+                elif DataSize % 16 == 0:
+                    ImportsOffset = DataSize
+                    ImportCount = (ResourceUncompressed1Size - ImportsOffset) // 16
+                else:
+                    ImportsOffset = DataSize + 16 - DataSize % 16
+                    ImportCount = (ResourceUncompressed1Size - ImportsOffset) // 16
 
         elif ResourceType == "CgsVertexProgramState":
             Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
@@ -1478,7 +1497,7 @@ def BundlePS3Packer(Path, IDs):
 
 
 print("Need For Speed Most Wanted(2012) Bundle Tool By NIVSAYZ")
-print("Version:1.0.0")
+print("Version:1.0.1")
 PathList = sys.argv[1:]
 for Path in PathList:
     if "." in Path:
