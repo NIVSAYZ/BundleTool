@@ -90,7 +90,92 @@ ResourceTypeDict = {"01000000": "Texture",
                     "02030000": "BearGlobalParameters",
                     "03030000": "ConvexHull",
                     "01050000": "HSMData",
-                    "01070000": "TrafficLaneData"}
+                    "01070000": "TrafficLaneData",
+                    "Texture": "01000000",
+                    "Material": "02000000",
+                    "VertexDescriptor": "03000000",
+                    "VertexProgramState": "04000000",
+                    "Renderable": "05000000",
+                    "MaterialState": "06000000",
+                    "SamplerState": "07000000",
+                    "ShaderProgramBuffer": "08000000",
+                    "AttribSysSchema": "10000000",
+                    "AttribSysVault": "11000000",
+                    "GenesysType": "12000000",
+                    "GenesysObject": "13000000",
+                    "GenesysType": "14000000",
+                    "GenesysObject": "15000000",
+                    "BinaryFile": "16000000",
+                    "EntryList": "20000000",
+                    "Font": "30000000",
+                    "LuaCode": "40000000",
+                    "InstanceList": "50000000",
+                    "Model": "51000000",
+                    "ColorCube": "52000000",
+                    "Shader": "53000000",
+                    "PolygonSoupList": "60000000",
+                    "PolygonSoupTree": "61000000",
+                    "NavigationMesh": "68000000",
+                    "TextFile": "70000000",
+                    "TextFile": "71000000",
+                    "ResourceHandleList": "72000000",
+                    "LuaData": "74000000",
+                    "AllocatorInPool": "78000000",
+                    "Ginsu": "80000000",
+                    "Wave": "81000000",
+                    "WaveContainerTable": "82000000",
+                    "GameplayLinkData": "83000000",
+                    "WaveDictionary": "84000000",
+                    "MicroMonoStream": "85000000",
+                    "Reverb": "86000000",
+                    "ZoneList": "90000000",
+                    "WorldPaintMap": "91000000",
+                    "IceAnimDictionary": "A0000000",
+                    "AnimationList": "B0000000",
+                    "PathAnimation": "B1000000",
+                    "Skeleton": "B2000000",
+                    "Animation": "B3000000",
+                    "CgsVertexProgramState": "C0000000",
+                    "CgsProgramBuffer": "C1000000",
+                    "DeltaDeleted": "DE000000",
+                    "VehicleList": "05010000",
+                    "GraphicsSpec": "06010000",
+                    "VehiclePhysicsSpec": "07010000",
+                    "WheelGraphicsSpec": "0A010000",
+                    "EnvironmentKeyframe": "12010000",
+                    "EnvironmentTimeLine": "13010000",
+                    "EnvironmentDictionary": "14010000",
+                    "AIData": "00020000",
+                    "Language": "01020000",
+                    "TriggerData": "02020000",
+                    "RoadData": "03020000",
+                    "DynamicInstanceList": "04020000",
+                    "WorldObject": "05020000",
+                    "ZoneHeader": "06020000",
+                    "VehicleSound": "07020000",
+                    "RoadMapDataResourceType": "08020000",
+                    "CharacterSpec": "09020000",
+                    "CharacterList": "0A020000",
+                    "SurfaceSounds": "0B020000",
+                    "ReverbRoadData": "0C020000",
+                    "CameraTake": "0D020000",
+                    "CameraTakeList": "0E020000",
+                    "GroundcoverCollection": "0F020000",
+                    "ControlMesh": "10020000",
+                    "CutsceneData": "11020000",
+                    "CutsceneList": "12020000",
+                    "LightInstanceList": "13020000",
+                    "GroundcoverInstances": "14020000",
+                    "CompoundObject": "15020000",
+                    "CompoundInstanceList": "16020000",
+                    "PropObject": "17020000",
+                    "PropInstanceList": "18020000",
+                    "ZoneAmbienceList": "19020000",
+                    "BearEffect": "01030000",
+                    "BearGlobalParameters": "02030000",
+                    "ConvexHull": "03030000",
+                    "HSMData": "01050000",
+                    "TrafficLaneData": "01070000",}
 
 
 def BundlePCUnpacker(Path, Bundle):
@@ -112,16 +197,18 @@ def BundlePCUnpacker(Path, Bundle):
         ResourceEntire = Bundle[ResourceEntrieOffset * 2:(ResourceEntrieOffset + 72) * 2]
 
         # ===资源条目基本信息===
-        ResourceID = ResourceEntire[:8].upper()  # 资源ID(前4位)
-        ResourceID = '_'.join([ResourceID[x:x + 2] for x in range(0, len(ResourceID), 2)])  # 资源ID(填充下划线)
+        ResourceIdPrefix = ResourceEntire[:8].upper()  # 资源ID(前4位)
+        ResourceIdPrefix = '_'.join([ResourceIdPrefix[x:x + 2] for x in range(0, len(ResourceIdPrefix), 2)])  # 资源ID(填充下划线)
         ResourceIDSuffix1 = struct.unpack("<B", bytes.fromhex(ResourceEntire[8:10]))[0]  # 资源ID后缀1
         ResourceIDSuffix2 = struct.unpack("<B", bytes.fromhex(ResourceEntire[12:14]))[0]  # 资源ID后缀2
         if ResourceIDSuffix1 != 0 and ResourceIDSuffix2 != 0:
-            ResourceID += "_" + str(ResourceIDSuffix1) + "_" + str(ResourceIDSuffix2)
+            ResourceID = ResourceIdPrefix + "_" + str(ResourceIDSuffix1) + "_" + str(ResourceIDSuffix2)
         elif ResourceIDSuffix1 == 0 and ResourceIDSuffix2 != 0:
-            ResourceID += "_0_" + str(ResourceIDSuffix2)
+            ResourceID = ResourceIdPrefix + "_0_" + str(ResourceIDSuffix2)
         elif ResourceIDSuffix1 != 0 and ResourceIDSuffix2 == 0:
-            ResourceID += "_" + str(ResourceIDSuffix1)
+            ResourceID = ResourceIdPrefix + "_" + str(ResourceIDSuffix1)
+        else:
+            ResourceID = ResourceIdPrefix
 
         ResourceTypeID = ResourceEntire[120:128].upper()
         ResourceType = ResourceTypeDict[ResourceTypeID]
@@ -194,16 +281,18 @@ def BundlePS3Unpacker(Path, Bundle):
         ResourceEntire = Bundle[ResourceEntrieOffset * 2:(ResourceEntrieOffset + 72) * 2]
 
         # ===资源条目基本信息===
-        ResourceID = ResourceEntire[8:16].upper()  # 资源ID(前4位)
-        ResourceID = '_'.join([ResourceID[x:x + 2] for x in range(0, len(ResourceID), 2)])  # 资源ID(填充下划线)
+        ResourceIdPrefix = ResourceEntire[8:16].upper()  # 资源ID(前4位)
+        ResourceIdPrefix = '_'.join([ResourceIdPrefix[x:x + 2] for x in range(0, len(ResourceIdPrefix), 2)])  # 资源ID(填充下划线)
         ResourceIDSuffix1 = struct.unpack(">B", bytes.fromhex(ResourceEntire[2:4]))[0]  # 资源ID后缀1
         ResourceIDSuffix2 = struct.unpack(">B", bytes.fromhex(ResourceEntire[6:8]))[0]  # 资源ID后缀2
         if ResourceIDSuffix2 != 0 and ResourceIDSuffix1 != 0:
-            ResourceID += "_" + str(ResourceIDSuffix2) + "_" + str(ResourceIDSuffix1)
+            ResourceID = ResourceIdPrefix + "_" + str(ResourceIDSuffix2) + "_" + str(ResourceIDSuffix1)
         elif ResourceIDSuffix2 == 0 and ResourceIDSuffix1 != 0:
-            ResourceID += "_0_" + str(ResourceIDSuffix1)
+            ResourceID = ResourceIdPrefix + "_0_" + str(ResourceIDSuffix1)
         elif ResourceIDSuffix2 != 0 and ResourceIDSuffix1 == 0:
-            ResourceID += "_" + str(ResourceIDSuffix2)
+            ResourceID = ResourceIdPrefix + "_" + str(ResourceIDSuffix2)
+        else:
+            ResourceID = ResourceIdPrefix
 
         ResourceTypeID = ResourceEntire[120:128].upper()
         ResourceTypeID = ResourceTypeID[6:8] + ResourceTypeID[4:6] + ResourceTypeID[2:4] + ResourceTypeID[:2]
@@ -284,30 +373,96 @@ def BundlePS3Unpacker(Path, Bundle):
 
 
 def BundlePCPacker(Path, IDs):
+    # ===初始化===
     NewResourceEntiresChunk = str()
     NewResourceCompressedChunk1 = str()
     NewResourceCompressedChunk2 = str()
     ResourceCompressed1Offset = int()
     ResourceCompressed2Offset = int()
 
-    NewIDsSize = len(IDs) // 2
-    NewResourceEntrieCount = (NewIDsSize - 112) // 72  # 重新计算资源条目数量
-    ResourceEntriesOffset = struct.unpack("<L", bytes.fromhex(IDs[32:40]))[0]
+    # ===新IDs资源条目信息计算===
+    NewResourceEntrieCount = (len(IDs) // 2 - 112) // 72  # IDs资源条目数量
+    ResourceEntriesOffset = struct.unpack("<L", bytes.fromhex(IDs[32:40]))[0]  # IDs资源条目偏移
 
+    # ===IDs添加模式===
+    # ===初始化===
+    AddResourceEntireCount = int()
+    AddResourceEntire = str()
+    IDsResourceIdList = list()
+
+    # ===遍历IDs收集资源ID===
+    for ResourceEntrieNum in range(NewResourceEntrieCount):
+        ResourceEntrie = IDs[(ResourceEntriesOffset + 72 * ResourceEntrieNum) * 2:(ResourceEntriesOffset + 72 * (ResourceEntrieNum + 1)) * 2]
+        IDsResourceIdList.append(ResourceEntrie[:14])
+
+    # ===遍历解包目录===
+    for Item in os.scandir(Path):
+        ResourceType = Item.name
+        ItemPath = Item.path
+
+        # ===跳过文件===
+        if Item.is_file() == True:
+            continue
+
+        # ===遍历资源目录===
+        for Item in os.scandir(ItemPath):
+            if "_texture" in Item.name or "_model" in Item.name or ".bak" in Item.name:
+                continue
+
+            if ResourceType == "Texture" or ResourceType == "Renderable":
+                ItemName = Item.name[:11].lower()
+            else:
+                ItemName = Item.name.replace(".dat", "").lower()
+
+            # ===跳过目录===
+            if  Item.is_dir() == True:
+                continue
+
+            # ===创建资源条目ID===
+            ResourceID2Split = ItemName.split("_")
+            ResourceID2SplitLength = len(ResourceID2Split)
+            if ResourceID2SplitLength == 6:
+                ResourceID2 = ResourceID2Split[0] + ResourceID2Split[1] + ResourceID2Split[2] + ResourceID2Split[3] + struct.pack("<B", int(ResourceID2Split[4])).hex() + "00" + struct.pack("<B", int(ResourceID2Split[5])).hex()
+            elif ResourceID2SplitLength == 5:
+                ResourceID2 = ResourceID2Split[0] + ResourceID2Split[1] + ResourceID2Split[2] + ResourceID2Split[3] + struct.pack("<B", int(ResourceID2Split[4])).hex() + "0000"
+            else:
+                ResourceID2 = ResourceID2Split[0] + ResourceID2Split[1] + ResourceID2Split[2] + ResourceID2Split[3] + "000000"
+
+            if ResourceType == "SamplerState" or ResourceType == "VehicleSound":
+                ResourceID2 += "00"
+            else:
+                ResourceID2 += "01"
+
+            # ===跳过已存在资源===
+            if ResourceID2[:14] in IDsResourceIdList:
+                continue
+            AddResourceEntireCount += 1
+
+            # ===创建新资源条目===
+            AddResourceEntire += ResourceID2 + "00000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" + ResourceTypeDict[ResourceType] + "0000000000000000"
+    IDs = IDs[:ResourceEntriesOffset * 2] + AddResourceEntire + IDs[ResourceEntriesOffset * 2:]
+    NewIDsSize = len(IDs) // 2  # 新IDs大小
+    NewResourceEntrieCount += AddResourceEntireCount
+
+    # ===遍历IDs资源条目===
     for ResourceEntrieNum in range(NewResourceEntrieCount):
         ResourceEntrie = IDs[(ResourceEntriesOffset + 72 * ResourceEntrieNum) * 2:(ResourceEntriesOffset + 72 * (ResourceEntrieNum + 1)) * 2]
 
-        ResourceID = ResourceEntrie[:8].upper()
-        ResourceID = '_'.join([ResourceID[x:x + 2] for x in range(0, len(ResourceID), 2)])
+        # ===资源ID处理===
+        ResourceIdPrefix = ResourceEntrie[:8].upper()
+        ResourceIdPrefix = '_'.join([ResourceIdPrefix[x:x + 2] for x in range(0, len(ResourceIdPrefix), 2)])
         ResourceIdSuffix1 = struct.unpack("<B", bytes.fromhex(ResourceEntrie[8:10]))[0]
         ResourceIdSuffix2 = struct.unpack("<B", bytes.fromhex(ResourceEntrie[12:14]))[0]
         if ResourceIdSuffix1 != 0 and ResourceIdSuffix2 != 0:
-            ResourceID += "_" + str(ResourceIdSuffix1) + "_" + str(ResourceIdSuffix2)
+            ResourceName = ResourceIdPrefix + "_" + str(ResourceIdSuffix1) + "_" + str(ResourceIdSuffix2)
         elif ResourceIdSuffix1 == 0 and ResourceIdSuffix2 != 0:
-            ResourceID += "_0_" + str(ResourceIdSuffix2)
+            ResourceName = ResourceIdPrefix + "_0_" + str(ResourceIdSuffix2)
         elif ResourceIdSuffix1 != 0 and ResourceIdSuffix2 == 0:
-            ResourceID += "_" + str(ResourceIdSuffix1)
+            ResourceName = ResourceIdPrefix + "_" + str(ResourceIdSuffix1)
+        else:
+            ResourceName = ResourceIdPrefix
 
+        # ===资源类型ID处理===
         ResourceTypeID = ResourceEntrie[120:128].upper()
         ResourceType = '_'.join([ResourceTypeID[x:x + 2] for x in range(0, len(ResourceTypeID), 2)])
         try:
@@ -316,45 +471,31 @@ def BundlePCPacker(Path, IDs):
             input("Error:Unrecognized data type[{}]".format(ResourceType))
             continue
 
-        if ResourceType == "BearEffect":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
+        # ===资源块1压缩===
+        Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceName + ".dat"
+        ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
+        ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
 
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
+        ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
+        ResourceCompressed1Size = len(ResourceCompressed1) // 2
+        NewResourceCompressedChunk1 += ResourceCompressed1
 
+        # ===资源块剩余信息处理===
+        if ResourceType == "BearEffect" or ResourceType == "01030000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
             ImportCount = struct.unpack("<H", bytes.fromhex(ResourceUncompressed1[8:10]))[0]
             ImportsOffset = ResourceUncompressed1Size - ImportCount * 16
 
-        elif ResourceType == "CompoundInstanceList":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "CompoundInstanceList" or ResourceType == "16020000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
             ImportCount = struct.unpack("<L", bytes.fromhex(ResourceUncompressed1[16:24]))[0]
             ImportsOffset = ResourceUncompressed1Size - ImportCount * 16
 
-        elif ResourceType == "CompoundObject":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "CompoundObject" or ResourceType == "15020000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
@@ -365,60 +506,28 @@ def BundlePCPacker(Path, IDs):
                     ImportCount = (ResourceUncompressed1Size - ImportsOffset) // 16
                     break
 
-        elif ResourceType == "CharacterSpec":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "CharacterSpec" or ResourceType == "09020000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
             ImportCount = struct.unpack("<H", bytes.fromhex(ResourceUncompressed1[32:36]))[0]
             ImportsOffset = ResourceUncompressed1Size - ImportCount * 16
 
-        elif ResourceType == "DynamicInstanceList":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "DynamicInstanceList" or ResourceType == "04020000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
             ImportCount = struct.unpack("<L", bytes.fromhex(ResourceUncompressed1[16:24]))[0]
             ImportsOffset = ResourceUncompressed1Size - ImportCount * 16
 
-        elif ResourceType == "Font":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "Font" or ResourceType == "30000000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
             ImportsOffset = struct.unpack("<L", bytes.fromhex(ResourceUncompressed1[8:16]))[0]
             ImportCount = (ResourceUncompressed1Size - ImportsOffset) // 16
 
-        elif ResourceType == "GenesysType":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "GenesysType" or ResourceType == "12000000" or ResourceType == "14000000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
@@ -433,15 +542,7 @@ def BundlePCPacker(Path, IDs):
             else:
                 ImportCount = ImportsOffset = 0
 
-        elif ResourceType == "GenesysObject":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "GenesysObject" or ResourceType == "13000000" or ResourceType == "15000000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
@@ -452,30 +553,14 @@ def BundlePCPacker(Path, IDs):
                     ImportCount = (ResourceUncompressed1Size - ImportsOffset) // 16
                     break
 
-        elif ResourceType == "GraphicsSpec":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "GraphicsSpec" or ResourceType == "06010000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
             ImportsOffset = struct.unpack("<L", bytes.fromhex(ResourceUncompressed1[1232:1240]))[0] + 16
             ImportCount = (ResourceUncompressed1Size - ImportsOffset) // 16
 
-        elif ResourceType == "GroundcoverCollection":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "GroundcoverCollection" or ResourceType == "0F020000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
@@ -488,15 +573,7 @@ def BundlePCPacker(Path, IDs):
                     ImportCount = (ResourceUncompressed1Size - ImportsOffset) // 16
                     break
 
-        elif ResourceType == "InstanceList":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "InstanceList" or ResourceType == "50000000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
@@ -507,30 +584,14 @@ def BundlePCPacker(Path, IDs):
                     ImportCount = (ResourceUncompressed1Size - ImportsOffset) // 16
                     break
 
-        elif ResourceType == "Material":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "Material" or ResourceType == "02000000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
             ImportsOffset = struct.unpack("<H", bytes.fromhex(ResourceUncompressed1[12:16]))[0]
             ImportCount = (ResourceUncompressed1Size - ImportsOffset) // 16
 
-        elif ResourceType == "Model":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "Model" or ResourceType == "51000000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
@@ -542,30 +603,14 @@ def BundlePCPacker(Path, IDs):
                     ImportCount = (ResourceUncompressed1Size - ImportsOffset) // 16
                     break
 
-        elif ResourceType == "PropInstanceList":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "PropInstanceList" or ResourceType == "18020000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
             ImportCount = struct.unpack("<L", bytes.fromhex(ResourceUncompressed1[16:24]))[0]
             ImportsOffset = ResourceUncompressed1Size - ImportCount * 16
 
-        elif ResourceType == "PropObject":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "PropObject" or ResourceType == "17020000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
@@ -576,16 +621,8 @@ def BundlePCPacker(Path, IDs):
                     ImportCount = (ResourceUncompressed1Size - ImportsOffset) // 16
                     break
 
-        elif ResourceType == "Renderable":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
-            Resource2Path = Path + "\\" + ResourceType + "\\" + ResourceID + "_model.dat"
+        elif ResourceType == "Renderable" or ResourceType == "05000000":
+            Resource2Path = Path + "\\" + ResourceType + "\\" + ResourceName + "_model.dat"
             ResourceUncompressed2 = open(Resource2Path, "rb").read().hex()
             ResourceUncompressed2Size = len(ResourceUncompressed2) // 2
 
@@ -596,31 +633,15 @@ def BundlePCPacker(Path, IDs):
             ImportCount = struct.unpack("<H", bytes.fromhex(ResourceUncompressed1[36:40]))[0]
             ImportsOffset = ResourceUncompressed1Size - ImportCount * 16
 
-        elif ResourceType == "Shader":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "Shader" or ResourceType == "53000000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
             ImportsOffset = struct.unpack("<H", bytes.fromhex(ResourceUncompressed1[36:40]))[0]
             ImportCount = (ResourceUncompressed1Size - ImportsOffset) // 16
 
-        elif ResourceType == "Texture":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
-            Resource2Path = Path + "\\" + ResourceType + "\\" + ResourceID + "_texture.dat"
+        elif ResourceType == "Texture" or ResourceType == "01000000":
+            Resource2Path = Path + "\\" + ResourceType + "\\" + ResourceName + "_texture.dat"
             ResourceUncompressed2 = open(Resource2Path, "rb").read().hex()
             ResourceUncompressed2Size = len(ResourceUncompressed2) // 2
 
@@ -631,30 +652,14 @@ def BundlePCPacker(Path, IDs):
             ImportsOffset = 0
             ImportCount = 0
 
-        elif ResourceType == "TrafficLaneData":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "TrafficLaneData" or ResourceType == "01070000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
             ImportsOffset = struct.unpack("<L", bytes.fromhex(ResourceUncompressed1[8:16]))[0] + 8
             ImportCount = (ResourceUncompressed1Size - ImportsOffset) // 16
 
-        elif ResourceType == "VehicleSound":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "VehicleSound" or ResourceType == "07020000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
@@ -665,15 +670,7 @@ def BundlePCPacker(Path, IDs):
                     ImportCount = (ResourceUncompressed1Size - ImportsOffset) // 16
                     break
 
-        elif ResourceType == "VertexProgramState":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "VertexProgramState" or ResourceType == "04000000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
@@ -684,15 +681,7 @@ def BundlePCPacker(Path, IDs):
                     ImportCount = (ResourceUncompressed1Size - ImportsOffset) // 16
                     break
 
-        elif ResourceType == "WorldObject":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "WorldObject" or ResourceType == "05020000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
@@ -703,15 +692,7 @@ def BundlePCPacker(Path, IDs):
                     ImportCount = (ResourceUncompressed1Size - ImportsOffset) // 16
                     break
 
-        elif ResourceType == "ZoneHeader":
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
+        elif ResourceType == "ZoneHeader" or ResourceType == "06020000":
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
@@ -723,14 +704,6 @@ def BundlePCPacker(Path, IDs):
                     break
 
         else:
-            Resource1Path = Path + "\\" + ResourceType + "\\" + ResourceID + ".dat"
-            ResourceUncompressed1 = open(Resource1Path, "rb").read().hex()
-            ResourceUncompressed1Size = len(ResourceUncompressed1) // 2
-
-            ResourceCompressed1 = zlib.compress(bytes.fromhex(ResourceUncompressed1), 9).hex()
-            ResourceCompressed1Size = len(ResourceCompressed1) // 2
-            NewResourceCompressedChunk1 += ResourceCompressed1
-
             ResourceUncompressed2Size = 0
             ResourceCompressed2Size = 0
 
@@ -750,12 +723,14 @@ def BundlePCPacker(Path, IDs):
     ResourceCompressed2ChunkOffset = NewIDsSize + ResourceCompressed1Offset
     NewIDsHeader = IDs[:16] + struct.pack("<L", NewBundleSize).hex() + struct.pack("<L", NewResourceEntrieCount).hex() + IDs[32:40] + struct.pack("<L", NewIDsSize).hex() + struct.pack("<L", ResourceCompressed2ChunkOffset).hex() + struct.pack("<L", NewBundleSize).hex() * 2 + IDs[72:224]
 
+    # ===DebugXml信息读取===
     DebugInfoXmlPath = Path + "\\" + "ResourceStringTable.xml"
     if os.path.exists(DebugInfoXmlPath):
         DebugInfo = open(DebugInfoXmlPath, "rb").read().hex()
     else:
         DebugInfo = str()
 
+    # ===写入BNDL===
     NewBundleOutputPath = Path + ".BNDL"
     NewBundle = open(NewBundleOutputPath, "wb")
     NewBundle.write(bytes.fromhex(NewIDsHeader + NewResourceEntiresChunk + NewResourceCompressedChunk1 + NewResourceCompressedChunk2 + DebugInfo))
@@ -780,16 +755,18 @@ def BundlePS3Packer(Path, IDs):
     for ResourceEntrieNum in range(NewResourceEntrieCount):
         ResourceEntrie = IDs[(ResourceEntriesOffset + 72 * ResourceEntrieNum) * 2:(ResourceEntriesOffset + 72 * (ResourceEntrieNum + 1)) * 2]
 
-        ResourceID = ResourceEntrie[8:16].upper()
-        ResourceID = '_'.join([ResourceID[x:x + 2] for x in range(0, len(ResourceID), 2)])
+        ResourceIdPrefix = ResourceEntrie[8:16].upper()
+        ResourceIdPrefix = '_'.join([ResourceIdPrefix[x:x + 2] for x in range(0, len(ResourceIdPrefix), 2)])
         ResourceIDSuffix1 = struct.unpack(">B", bytes.fromhex(ResourceEntrie[2:4]))[0]
         ResourceIDSuffix2 = struct.unpack(">B", bytes.fromhex(ResourceEntrie[6:8]))[0]
         if ResourceIDSuffix2 != 0 and ResourceIDSuffix1 != 0:
-            ResourceID += "_" + str(ResourceIDSuffix2) + "_" + str(ResourceIDSuffix1)
+            ResourceID = ResourceIdPrefix + "_" + str(ResourceIDSuffix2) + "_" + str(ResourceIDSuffix1)
         elif ResourceIDSuffix2 == 0 and ResourceIDSuffix1 != 0:
-            ResourceID += "_0_" + str(ResourceIDSuffix1)
+            ResourceID = ResourceIdPrefix +  "_0_" + str(ResourceIDSuffix1)
         elif ResourceIDSuffix2 != 0 and ResourceIDSuffix1 == 0:
-            ResourceID += "_" + str(ResourceIDSuffix2)
+            ResourceID = ResourceIdPrefix + "_" + str(ResourceIDSuffix2)
+        else:
+            ResourceID = ResourceIdPrefix
 
         ResourceTypeID = ResourceEntrie[120:128].upper()
         ResourceTypeID = ResourceTypeID[6:] + ResourceTypeID[4:6] + ResourceTypeID[2:4] + ResourceTypeID[:2]
@@ -1497,7 +1474,7 @@ def BundlePS3Packer(Path, IDs):
 
 
 print("Need For Speed Most Wanted(2012) Bundle Tool By NIVSAYZ")
-print("Version:1.0.1")
+print("V1.1.0.20240725")
 PathList = sys.argv[1:]
 for Path in PathList:
     if "." in Path:
